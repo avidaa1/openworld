@@ -1067,7 +1067,7 @@ if(document.readyState==='complete')start();else addEventListener('load',start);
 addEventListener('resize',sched);})();</script><script id="av-shell-20261124">/* AVIDAA shell: shared header (or floating pill) + footer with the "Last updated" stamp. No outside calls, no tracking.
    Template tokens are replaced when a page is built: Open World --av-games Games and Worlds 2026-11-24 06:36 */
 (function(){
-  var NAME='Open World',SECTOR='--av-games',STAMP='2026-11-25 14:05',HOME='https://avidaa1.github.io/';
+  var NAME='Open World',SECTOR='--av-games',STAMP='2026-11-25 14:40',HOME='https://avidaa1.github.io/';
   var ARROW='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   function build(){
     if(!document.body||document.querySelector('.av-footer'))return;
@@ -1298,6 +1298,78 @@ addEventListener('resize',sched);})();</script><script id="av-shell-20261124">/*
   setTimeout(placement, 1800);
   size(); build(); t0 = performance.now();
   if (reduced) draw(0, true); else start();
+})();
+</script>
+<script id="av-back-worlds-20261125">/* AVIDAA Back to Worlds: one small link to the lobby. No outside calls, no tracking.
+   It sits in the shared header when that spot is free, otherwise in the first screen spot where nothing clickable and no HUD sits, and moves away if something appears there later. */
+(function(){
+  if(window.__avBackWorlds||document.getElementById('av-back-worlds'))return;window.__avBackWorlds=1;
+  var URL_='https://avidaa1.github.io/worlds/';
+  var BASE='box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 14px;border-radius:999px;border:2px solid rgba(255,217,61,.85);background:rgba(6,9,30,.82);color:#F3F1FF;font:800 14px/1 ui-rounded,system-ui,"Segoe UI",Roboto,Arial,sans-serif;text-decoration:none;white-space:nowrap;';
+  function make(){
+    if(!document.body||document.getElementById('av-back-worlds'))return;
+    var a=document.createElement('a');a.id='av-back-worlds';a.href=URL_;a.setAttribute('aria-label','Back to Worlds, the AVIDAA worlds lobby');a.textContent='⬡ Worlds';
+    a.style.cssText=BASE+'position:fixed;z-index:2147482500;opacity:.94';
+    a.addEventListener('focus',function(){a.style.outline='3px solid #FFD93D';a.style.outlineOffset='2px';});
+    a.addEventListener('blur',function(){a.style.outline='';});
+    document.documentElement.appendChild(a);
+    var cur=null,tm=0,mode='fixed',FR=[];
+    function fixedRects(){
+      FR=[];var vw=innerWidth,vh=innerHeight,all=document.body.querySelectorAll('*'),n=Math.min(all.length,5000);
+      for(var i=0;i<n;i++){var e=all[i];if(e===a||e.tagName==='CANVAS'||e.tagName==='SCRIPT'||e.tagName==='STYLE')continue;
+        var cs=getComputedStyle(e);if(cs.position!=='fixed'||cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity)<0.05)continue;
+        var r=e.getBoundingClientRect();if(r.width<4||r.height<4||r.width*r.height>=vw*vh*0.5)continue;
+        var m=/rgba?\(([^)]*)\)/.exec(cs.backgroundColor||''),al=m?(m[1].split(',').length<4?1:parseFloat(m[1].split(',')[3])):0;
+        var own=false;for(var c=e.firstChild;c;c=c.nextSibling)if(c.nodeType===3&&c.nodeValue.trim()){own=true;break;}
+        if(own||al>0.15||e.matches('a,button,input,select,textarea,[onclick],[role=button]'))FR.push([r.left,r.top,r.right,r.bottom,cs.pointerEvents==='none'?5:1]);}
+    }
+    /* how much sits under the rectangle: 100 per clickable thing, 1 per text or HUD box, 5 per click-through HUD text */
+    function score(l,t,w,h){
+      var vw=innerWidth,vh=innerHeight,sc=0;
+      for(var f=0;f<FR.length;f++){var q=FR[f];if(l-6<q[2]&&l+w+6>q[0]&&t-6<q[3]&&t+h+6>q[1])sc+=q[4];}
+      if(l<0||t<0||l+w>vw||t+h>vh)return 9999;
+      for(var yy=0;yy<4;yy++)for(var xx=0;xx<6;xx++){
+        var els=document.elementsFromPoint(Math.min(vw-1,Math.max(0,l-6+(w+12)*xx/5)),Math.min(vh-1,Math.max(0,t-6+(h+12)*yy/3)));
+        for(var q2=0;q2<els.length;q2++){
+          var e=els[q2];if(e===a||e===document.documentElement||e===document.body||e.tagName==='CANVAS'||e.contains(a))continue;
+          if(e.matches&&e.matches('a,button,input,select,textarea,summary,label,[onclick],[role=button],[role=link],[tabindex]')){sc+=100;break;}
+          var cs=getComputedStyle(e);if(cs.pointerEvents==='none')continue;
+          if(cs.cursor==='pointer'){sc+=100;break;}
+          var r=e.getBoundingClientRect();
+          if(r.width*r.height>=vw*vh*0.5)break;
+          if(cs.visibility==='hidden'||parseFloat(cs.opacity)<0.05||cs.display==='none')continue;
+          var m=/rgba?\(([^)]*)\)/.exec(cs.backgroundColor||''),al=m?(m[1].split(',').length<4?1:parseFloat(m[1].split(',')[3])):0;
+          if((e.textContent||'').trim()||al>0.15){sc+=1;break;}
+        }
+      }
+      return sc;
+    }
+    function toFixed(){mode='fixed';a.style.cssText=BASE+'position:fixed;z-index:2147482500;opacity:.94';if(a.parentNode!==document.documentElement)document.documentElement.appendChild(a);}
+    function place(){
+      var hdr=document.querySelector('.av-header');fixedRects();
+      if(hdr){
+        if(mode!=='header'||a.parentNode!==hdr){a.style.cssText=BASE+'position:static;margin-left:auto;flex:none';hdr.appendChild(a);mode='header';}
+        var hr=a.getBoundingClientRect();
+        if(hr.width>0&&hr.bottom<=hdr.getBoundingClientRect().bottom+2&&hr.top>=-1&&score(hr.left,hr.top,hr.width,hr.height)===0)return;
+        toFixed();
+      } else if(mode!=='fixed')toFixed();
+      var w=a.offsetWidth||96,h=a.offsetHeight||44,vw=innerWidth,vh=innerHeight,FB=36,M=8;
+      var C=[[M,vh-h-FB],[vw-w-M,vh-h-FB],[vw-w-M,M],[M,M]],k;
+      for(k=1;k<=5;k++){var fy=M+(vh-h-FB-M)*k/6,fx=M+(vw-w-2*M)*k/6;C.push([M,fy]);C.push([vw-w-M,fy]);C.push([fx,M]);C.push([fx,vh-h-FB]);}
+      if(cur&&Math.abs(cur[2]-vw)<1&&Math.abs(cur[3]-vh)<1&&score(cur[0],cur[1],w,h)===0){a.style.top=Math.round(cur[1])+'px';a.style.left=Math.round(cur[0])+'px';a.style.right='auto';a.style.bottom='auto';return;}
+      var best=C[0],bs=1e9;
+      for(var i=0;i<C.length;i++){var sc=score(C[i][0],C[i][1],w,h);if(sc<bs){bs=sc;best=C[i];}if(sc===0)break;}
+      a.style.top=Math.round(best[1])+'px';a.style.left=Math.round(best[0])+'px';a.style.right='auto';a.style.bottom='auto';
+      cur=[best[0],best[1],vw,vh];
+    }
+    function sched(){clearTimeout(tm);tm=setTimeout(function(){try{place();}catch(e){}},350);}
+    setInterval(function(){if(!document.hidden)sched();},3000);
+    addEventListener('resize',sched);addEventListener('load',sched);addEventListener('click',sched,true);addEventListener('keyup',sched,true);addEventListener('orientationchange',sched);
+    [500,1500].forEach(function(ms){setTimeout(sched,ms);});
+    try{place();}catch(e){}
+    window.__avBackWorldsPlace=place;
+  }
+  if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(make,0);else addEventListener('DOMContentLoaded',function(){setTimeout(make,0);});
 })();
 </script>
 </body>
